@@ -1,7 +1,7 @@
-const { Panic, panic } = require("..")
+import { Panic, panic } from ".."
 
 test("name", () => {
-    expect(new Panic().name).toBe("Panic")
+    expect(new Panic("message").name).toBe("Panic")
 })
 
 test("message", () => {
@@ -10,12 +10,12 @@ test("message", () => {
 })
 
 test("stack", () => {
-    expect(new Panic().stack).toBeTruthy()
+    expect(new Panic("message").stack).toBeTruthy()
 
-    expect(new Panic().stack).toMatch(/Panic\.test\.js/)
+    expect(new Panic("message").stack).toMatch(/Panic\.test\.ts/)
 
     {
-        const p = new Panic()
+        const p = new Panic("message")
 
         expect(p.stack).toEqual(p.stack)
     }
