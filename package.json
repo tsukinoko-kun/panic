@@ -1,6 +1,6 @@
 {
   "name": "@frank-mayer/panic",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "More performant Error",
   "source": "src/index.ts",
   "main": "index.js",
