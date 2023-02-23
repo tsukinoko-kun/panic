@@ -1,8 +1,10 @@
+/* eslint-disable max-lines-per-function */
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-console */
 /* eslint-disable no-unused-expressions */
 
 const Benchmark = require("benchmark")
-const { Panic } = require("..")
+const { Panic, panic } = require("..")
 
 /**
  * @param {string} title
@@ -29,42 +31,67 @@ const testAsync = async (title, ...tests) => {
             console.log(markdownTable([header, ...result]))
             console.log()
         })
-        .run({ async: true })
+        .run({ async: false, defer: true })
 }
 
-console.log("## Performance tests\n")
+(async () => {
+    console.log("## Performance tests\n")
 
-testAsync(
-    "Constructor",
-    [
-        "new Error()",
-        function() {
-            new Error()
-        },
-    ],
-    [
-        "new Panic()",
-        function() {
-            new Panic()
-        },
-    ]
-)
-    .then((suite) => {
-        suite.on("complete", () => {
-            testAsync(
-                "Get call stack",
-                [
-                    "new Error().stack",
-                    function() {
-                        new Error().stack
-                    }
-                ],
-                [
-                    "new Panic().stack",
-                    function() {
-                        new Panic().stack
-                    }
-                ]
-            )
-        })
-    })
+    await testAsync(
+        "Constructor",
+        [
+            "new Error()",
+            function() {
+                new Error()
+            },
+        ],
+        [
+            "new Panic()",
+            function() {
+                new Panic()
+            },
+        ]
+    )
+
+    await testAsync(
+        "Get call stack",
+        [
+            "new Error().stack",
+            function() {
+                new Error().stack
+            }
+        ],
+        [
+            "new Panic().stack",
+            function() {
+                new Panic().stack
+            }
+        ]
+    )
+
+    await testAsync(
+        "throw",
+        [
+            "throw new Error()",
+            function() {
+                try {
+                    throw new Error("message")
+                }
+                catch (e) {
+                    return e.message
+                }
+            }
+        ],
+        [
+            "panic()",
+            function() {
+                try {
+                    panic("message")
+                }
+                catch (e) {
+                    e.message
+                }
+            }
+        ]
+    )
+})()

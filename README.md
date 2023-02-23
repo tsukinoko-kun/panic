@@ -59,3 +59,12 @@ You see, the `Panic` class is over **1500 times faster** than the `Error` class!
 | new Panic().stack | 71,171  | ±0.33%                   |
 
 Getting the call stack of a `Panic` instance is only 9% slower than getting the call stack of an `Error` instance.
+
+### throw
+
+| Name              | Ops/sec   | Relative margin of error |
+| ----------------- | --------- | ------------------------ |
+| throw new Error() | 139,958   | ±0.38%                   |
+| panic()           | 3,247,902 | ±0.29%                   |
+
+Throwing a `Panic` instance is over **23 times faster** than throwing an `Error` instance!
