@@ -42,13 +42,13 @@ const testAsync = async (title, ...tests) => {
         [
             "new Error()",
             function() {
-                new Error()
+                new Error("error message")
             },
         ],
         [
             "new Panic()",
             function() {
-                new Panic()
+                new Panic("error message")
             },
         ]
     )
@@ -58,13 +58,13 @@ const testAsync = async (title, ...tests) => {
         [
             "new Error().stack",
             function() {
-                new Error().stack
+                new Error("error message").stack
             }
         ],
         [
             "new Panic().stack",
             function() {
-                new Panic().stack
+                new Panic("error message").stack
             }
         ]
     )
@@ -75,7 +75,7 @@ const testAsync = async (title, ...tests) => {
             "throw new Error()",
             function() {
                 try {
-                    throw new Error("message")
+                    throw new Error("error message")
                 }
                 catch (e) {
                     return e.message
@@ -86,10 +86,10 @@ const testAsync = async (title, ...tests) => {
             "panic()",
             function() {
                 try {
-                    panic("message")
+                    panic("error message")
                 }
                 catch (e) {
-                    e.message
+                    return e.message
                 }
             }
         ]
