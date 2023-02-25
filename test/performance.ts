@@ -8,7 +8,7 @@ const { Panic, panic } = require("..")
 
 /**
  * @param {string} title
- * @param  {...Array<[String, ()=>void]>} tests
+ * @param {...Array<[String, ()=>void]>} tests
  */
 const testAsync = async (title, ...tests) => {
     console.log(`### ${title}\n`)
@@ -22,13 +22,14 @@ const testAsync = async (title, ...tests) => {
 
     return await suite
         .on("complete", function() {
+            const header = ["Name", "Ops/sec", "Relative margin of error"]
             const result = this.map((test) => [
                 test.name,
                 test.hz.toLocaleString("en", { maximumFractionDigits: 0 }),
                 `±${test.stats.rme.toFixed(2)}%`,
+
             ])
-            const header = ["Name", "Ops/sec", "Relative margin of error"]
-            console.log(markdownTable([header, ...result]))
+            console.log(markdownTable([header, ...result], { align: ["l", "r", "r", "r"] }))
             console.log()
         })
         .run({ async: false, defer: true })
@@ -54,22 +55,6 @@ const testAsync = async (title, ...tests) => {
     )
 
     await testAsync(
-        "Get call stack",
-        [
-            "new Error().stack",
-            function() {
-                new Error("error message").stack
-            }
-        ],
-        [
-            "new Panic().stack",
-            function() {
-                new Panic("error message").stack
-            }
-        ]
-    )
-
-    await testAsync(
         "throw",
         [
             "throw new Error()",
@@ -87,6 +72,32 @@ const testAsync = async (title, ...tests) => {
             function() {
                 try {
                     panic("error message")
+                }
+                catch (e) {
+                    return e.message
+                }
+            }
+        ]
+    )
+
+    await testAsync(
+        "throw with captureStackTrace enabled",
+        [
+            "throw new Error()",
+            function() {
+                try {
+                    throw new Error("error message")
+                }
+                catch (e) {
+                    return e.message
+                }
+            }
+        ],
+        [
+            "panic()",
+            function() {
+                try {
+                    panic("error message", true)
                 }
                 catch (e) {
                     return e.message

@@ -10,7 +10,9 @@
 
 ## What is this?
 
-This is a blazingly fast reimplementation of the `Error` class in TypeScript. In most cases, you don't need the call stack of an `Error`. This implementation is a lot faster than the original `Error` class because the collection of the call stack is extremely expensive and `Panic` only collects the call stack when you access its `stack` property.
+This is a blazingly fast reimplementation of the `Error` class in TypeScript. In most cases, you don't need the call stack of an `Error`. This implementation is a lot faster than the original `Error` class because the collection of the call stack is extremely expensive and `Panic` only collects the call stack when you need it.
+
+It is not possible to get the call stack on demand (when you access the `stack` Property) because the used `Error.captureStackTrace` function captures the current call stack and there is no way to get the call stack of a previous function context. (If you know a way to do this, please let me know.)
 
 ## Installation
 
@@ -40,31 +42,47 @@ if (someCondition) {
 }
 ```
 
+### What if I need the call stack?
+
+To get the call stack set the `Panic.captureStackTrace` Property to `true`. From now on every `Panic` instance will collect the call stack. This should only be done in development mode.
+
+```TypeScript
+import { Panic } from '@frank-mayer/panic';
+
+Panic.captureStackTrace = true;
+
+throw new Panic('Some condition was not met');
+```
+
+To get the call stack only for a single `Panic` instance, use the second parameter of the `panic` function.
+
+```TypeScript
+import { panic } from '@frank-mayer/panic';
+
+panic('Some condition was not met', true);
+```
+
 ## Performance tests
 
 ### Constructor
 
-| Name        | Ops/sec     | Relative margin of error |
-| ----------- | ----------- | ------------------------ |
-| new Error() | 231,460     | ±8.64%                   |
-| new Panic() | 360,287,200 | ±0.92%                   |
+| Name        |    Ops/sec | Relative margin of error |
+| :---------- | ---------: | -----------------------: |
+| new Error() |    403,086 |                   ±5.93% |
+| new Panic() | 71,113,873 |                   ±1.92% |
 
-You see, the `Panic` class is over **1500 times faster** than the `Error` class!
-
-### Get call stack
-
-| Name              | Ops/sec | Relative margin of error |
-| ----------------- | ------- | ------------------------ |
-| new Error().stack | 77,688  | ±0.46%                   |
-| new Panic().stack | 71,171  | ±0.33%                   |
-
-Getting the call stack of a `Panic` instance is only 9% slower than getting the call stack of an `Error` instance.
+You see, the `Panic` class is over **175 times faster** than the `Error` class!
 
 ### throw
 
-| Name              | Ops/sec   | Relative margin of error |
-| ----------------- | --------- | ------------------------ |
-| throw new Error() | 139,958   | ±0.38%                   |
-| panic()           | 3,247,902 | ±0.29%                   |
+| Name              |   Ops/sec | Relative margin of error |
+| :---------------- | --------: | -----------------------: |
+| throw new Error() |   309,103 |                   ±1.38% |
+| panic()           | 5,063,993 |                   ±0.86% |
 
-Throwing a `Panic` instance is over **23 times faster** than throwing an `Error` instance!
+### throw with captureStackTrace enabled
+
+| Name              | Ops/sec | Relative margin of error |
+| :---------------- | ------: | -----------------------: |
+| throw new Error() | 232,223 |                   ±0.37% |
+| panic()           | 248,450 |                   ±0.72% |
